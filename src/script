@@ -1,0 +1,64 @@
+#!/bin/python
+
+"""Простой тест реакции написаный на Python.
+"""
+
+import random
+import time
+import dataclasses
+import argparse
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+
+
+_MIN_TIME: float = 1.0
+
+
+@dataclasses.dataclass
+class ReactionMeasure():
+    # Дата
+    date: time.struct_time | None = time.localtime()
+    # Время отображения на экране
+    _start_time: float | None = None
+    # Время нажатия клавиши
+    _end_time: float | None = None
+
+    # Время реакции
+    @property
+    def time(self) -> float | None:
+        if self._end_time is None or self._start_time is None:
+            return None
+        return self._end_time - self._start_time
+
+    def start(self) -> None:
+        random_int = random.randint(0, 10000)
+        random_time = _MIN_TIME + float(random_int) / 10000
+
+        self.date = time.localtime()
+        time.sleep(random_time)
+        self._start_time = time.time()
+        input("Нажмите любую клавишу.")
+        self._end_time = time.time()
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    settings = parser.parse_args()
+    return settings
+
+
+if __name__ == "__main__":
+    settings = get_args()
+    measures = []
+    time_sum = 0.0
+    for x in range(4):
+        measure = ReactionMeasure()
+        measure.start()
+        print(measure.time)
+        if measure.time:
+            time_sum += measure.time
+        measures.append(measure)
+    print(time_sum/4)
