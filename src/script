@@ -6,6 +6,7 @@
 import random
 import time
 import dataclasses
+import curses
 import argparse
 import logging
 
@@ -43,9 +44,16 @@ class ReactionMeasure():
         input("Нажмите любую клавишу.")
         self._end_time = time.time()
 
+        # FIXME:
+        if self.time:
+            if self.time <= 0.001:
+                raise ValueError
+
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--repetitions", default=3, type=int, help="Количество повторений")
+    parser.add_argument("-e", default=False, type=bool, help="Отображать время реакции после каждого повторения")
     settings = parser.parse_args()
     return settings
 
@@ -54,11 +62,12 @@ if __name__ == "__main__":
     settings = get_args()
     measures = []
     time_sum = 0.0
-    for x in range(4):
+    for x in range(settings.repetitions):
         measure = ReactionMeasure()
         measure.start()
-        print(measure.time)
+        if settings.e:
+            print(measure.time)
         if measure.time:
             time_sum += measure.time
         measures.append(measure)
-    print(time_sum/4)
+    print(time_sum/settings.repetitions)
